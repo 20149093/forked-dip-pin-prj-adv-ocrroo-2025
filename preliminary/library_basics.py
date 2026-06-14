@@ -24,13 +24,13 @@ class CodingVideo:
 
 
     def __init__(self, video: Path | str):
-        self.capture = ... # You complete me!
+        self.capture = cv2.VideoCapture(str(video))
         if not self.capture.isOpened():
             raise ValueError(f"Cannot open {video}")
 
-        self.fps = ...
-        self.frame_count = ...
-        self.duration = ...
+        self.fps = float(self.capture.get(cv2.CAP_PROP_FPS))
+        self.frame_count = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.duration = self.frame_count / self.fps if self.fps else 0.0
 
 
     def __str__(self) -> str:
@@ -45,9 +45,19 @@ class CodingVideo:
         ----------
         https://docs.opencv.org/3.4/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d
         """
+        minutes = self.duration / 60.0
+        return (
+            f"FPS: {self.fps:.2f}\n"
+            f"FRAME COUNT: {self.frame_count}\n"
+            f"DURATION (minutes): {minutes:.2f}"
+        )
 
     def get_frame_number_at_time(self, seconds: int) -> int:
         """Given a time in seconds, returns the value of the nearest frame"""
+        frame_number = int(round(seconds * self.fps)) if self.fps else 0
+        if self.frame_count > 0:
+            frame_number = max(0, min(frame_number, self.frame_count - 1))
+        return frame_number
 
 
     def get_frame_rgb_array(self, frame_number: int) -> np.ndarray:
@@ -59,9 +69,14 @@ class CodingVideo:
 
         Reference
         ---------
-        # TODO: Find a tutorial on OpenCV that demonstrates color space conversion
+        https://docs.opencv.org/4.x/dd/d49/tutorial_py_contours.html
 
         """
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
+        ok, frame = self.capture.read()
+        if not ok or frame is None:
+            raise ValueError(f"Could not read frame {frame_number}")
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     def get_image_as_bytes(self, seconds: int) -> bytes:
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, self.get_frame_number_at_time(seconds))
@@ -77,13 +92,23 @@ class CodingVideo:
 
 
     def save_as_image(self, seconds: int, output_path: Path | str = 'output.png') -> None:
-      """Saves the given frame as a png image
+        """Saves the given frame as a png image
 
-      # TODO: Requires a third-party library to convert ndarray to png
-      # TODO: Identify the library and add a reference to its documentation
+        This uses OpenCV to convert the extracted frame ndarray into a PNG file.
 
+        Reference
+        ---------
+        https://docs.opencv.org/4.x/d8/dbc/tutorial_py_image_display.html
+        """
+        frame_number = self.get_frame_number_at_time(seconds)
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
+        ok, frame = self.capture.read()
+        if not ok or frame is None:
+            raise ValueError("Invalid frame in target location")
 
-      """
+        output_path = Path(output_path)
+        if not cv2.imwrite(str(output_path), frame):
+            raise ValueError(f"Failed to save image to {output_path}")
 def test():
     """Try out your class here"""
     oop = CodingVideo("resources/oop.mp4")
