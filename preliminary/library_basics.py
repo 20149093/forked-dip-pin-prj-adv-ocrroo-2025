@@ -15,6 +15,8 @@ Make sure you read the docstrings C.A.R.E.F.U.L.Y (yes, I took the L to check th
 from pathlib import Path
 import cv2
 import numpy as np
+import pytesseract
+from PIL import Image
 
 
 VID_PATH = Path("resources/name-of-vid-given-to-you-by-instructor.mp4")
@@ -77,6 +79,19 @@ class CodingVideo:
         if not ok or frame is None:
             raise ValueError(f"Could not read frame {frame_number}")
         return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    def get_text_from_frame(self, seconds: int) -> str:
+        """Returns OCR text extracted from the frame at the given time.
+
+        This method extracts a frame, converts it to a PIL image, and sends it to pytesseract.
+
+        Reference
+        ---------
+        https://pypi.org/project/pytesseract/
+        """
+        rgb_frame = self.get_frame_rgb_array(self.get_frame_number_at_time(seconds))
+        image = Image.fromarray(rgb_frame)
+        return pytesseract.image_to_string(image)
 
     def get_image_as_bytes(self, seconds: int) -> bytes:
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, self.get_frame_number_at_time(seconds))
