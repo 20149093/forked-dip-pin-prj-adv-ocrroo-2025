@@ -5,21 +5,27 @@ Drive the API to complete "interprocess communication"
 Requirements
 """
 
+import sys
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
 from fastapi import Response
 from pydantic import BaseModel
-from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from library_basics import CodingVideo
 
 
 app = FastAPI()
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+VIDEO_DIR = BASE_DIR / "resources"
 
 # We'll create a lightweight "database" for our videos
 # You can add uploads later (not required for assessment)
-# For now, we will just hardcode are samples
+# For now, we will just hardcode a sample path
 VIDEOS: dict[str, Path] = {
-    "demo": Path("../resources/oop.mp4")
+    "demo": VIDEO_DIR / "oop.mp4"
 }
 
 class VideoMetaData(BaseModel):
@@ -83,6 +89,16 @@ def video_frame(vid: str, t: float):
         video = _open_vid_or_404(vid)
         return Response(content=video.get_image_as_bytes(t), media_type="image/png")
     finally:
-      video.capture.release()
+        video.capture.release()
 
-# TODO: add enpoint to get ocr e.g. /video/{vid}/frame/{t}/ocr
+@app.get("/video/{vid}/frame/{t}/ocr")
+def video_frame_ocr(vid: str, t: float):
+    try:
+        video = _open_vid_or_404(vid)
+        return {
+            "id": vid,
+            "time_seconds": t,
+            "text": video.get_text_from_frame(t)
+        }
+    finally:
+        video.capture.release()
