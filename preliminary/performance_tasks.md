@@ -28,28 +28,28 @@ Complete the steps below and fill in the `> block` sections
 ### Installing and running OpenCV
 
 1. Examine the `pyproject.toml` what dependencies does it currently identify?
->
+> None. It currently identifies `dependencies = []`.
 >
 2. Create a `.venv` in this folder using `uv venv`
 3. Activate the `venv` as instructed by `uv`
 4. In order to complete the project, we need to install OpenCV. Fill in the following:
   - What role does OpenCV have in this project?
-  >
+  > OpenCV is used to open the video file, extract frames, convert BGR frames to RGB, and save images from video frames.
   - What is the `uv pip` command to install OpenCV?
-  > `uv pip install ????`
+  > `uv pip install opencv-python`
   - What is the URL of this library's git repo?
-  > [Insert URL Here](https://github.com/opencv/????-?????)
+  > [Insert URL Here](https://github.com/opencv/opencv-python)
 5. Add OpenCV to your project using the `uv add` command:
-  > `uv add name-of-open-cv-library
+  > `uv add opencv-python`
 
 6. Have the dependencies in the `pyproject.toml` changed? If so, how?
-  >
+  > Yes. The file now includes `"opencv-python>=4.13.0.92"` in the dependencies list.
   >
 7. Why did we use `uv add` over `uv pip`?
-  >
+  > `uv add` records the dependency in `pyproject.toml` and `uv.lock`, making it part of the project manifest. `uv pip` would only install the package into the environment without updating the project files.
   >
 8. The `numpy` library is required for OpenCV. Should you add an explicit requirement for it? Why/Why not?
-  >
+  > Not necessarily. `opencv-python` already depends on `numpy`, so it is installed automatically. Add an explicit requirement only if the project requires a specific numpy version.
   >
 9. Commit the changes so far to git. Use the message `chore: add OpenCV dependency`
 10. Go to `preliminary/library_basics.py` and complete the required functionality.
@@ -65,13 +65,13 @@ Tesseract consists of both an OCR Engine and a command line program. It is predo
 1. Examine the [Readme](https://github.com/tesseract-ocr/tesseract?tab=readme-ov-file) and find a list of Python wrappers.
 
 2. What is the URL that lists Python wrappers for Tesseract?
-  > <url-here>
+  > https://github.com/tesseract-ocr/tesseract#python-wrapper
 
 3. Select a Python wrapper. What wrapper did you choose and why? Ensure you address each element below in your answer
-> name of the python library
-> how long ago was a commit made to the library
-> does it have external dependencies
-> how does it suite the project requirements
+> name of the python library: `pytesseract`
+> how long ago was a commit made to the library: it is actively maintained with recent releases and commits within the last year
+> does it have external dependencies: yes, it requires the Tesseract OCR binary installed separately
+> how does it suite the project requirements: it provides a Python interface to the Tesseract engine so we can extract text from video frames in the OCR workflow
 
 4. Use UV to add the dependency to your project and your `pyproject.toml`
 
@@ -81,7 +81,7 @@ Tesseract consists of both an OCR Engine and a command line program. It is predo
 
 7. Add a new method in `library_basics.py` that returns the text of a given frame/time/image (you decide!)
 
-8. Commit the changes as `feat: OCR an image
+8. Commit the changes as `feat: OCR an image`
 
 
 ### Install and run FastAPI
@@ -97,10 +97,13 @@ FastAPI will allow us to enable communication with our OCR service from other pr
 `curl 127.0.0.1:8000/video`
 5. Confirm that a list of videos and URLs is returned by copying the output below:
 > Description
+> A JSON object containing `count` and an array of videos with `_links` for the API resources.
 6. What are the names of the two processes that just communicated?
->
+> The FastAPI server process and the curl HTTP client process.
+
 6. Modify the simple_api.py so that it works correctly with your implementation and complete any TODO markers
 7. Demonstrate the use of at least two other end points below:
->
->
->
+> `/video/demo`
+> `/video/demo/frame/1.0/ocr`
+> 
+> Optionally: `/video/demo/frame/1.0`
