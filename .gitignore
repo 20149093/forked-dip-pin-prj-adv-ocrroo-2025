@@ -8,3 +8,9 @@ wheels/
 
 # Virtual environments
 .venv
+
+# MacOS system files
+.DS_Store
+
+# Generated test outputs
+frame.png
